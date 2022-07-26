@@ -83,7 +83,7 @@ resource "aws_s3_bucket" "frontend_deploy" {
   bucket_prefix = "parkingspace-frontend-codepipeline"
 }
 
-resource "aws_s3_bucket_acl" "pipeline_bucket_acl" {
+resource "aws_s3_bucket_acl" "frontend" {
   bucket = aws_s3_bucket.frontend_deploy.id
   acl    = "private"
 }
