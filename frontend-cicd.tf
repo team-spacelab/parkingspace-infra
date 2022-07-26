@@ -80,7 +80,7 @@ resource "aws_codebuild_project" "frontend" {
 }
 
 resource "aws_s3_bucket" "frontend_deploy" {
-  bucket_prefix = "parkingspace-frontend-codepipeline"
+  bucket_prefix = "parkingspace-frontend-codepipeline-"
 }
 
 resource "aws_s3_bucket_acl" "frontend" {
