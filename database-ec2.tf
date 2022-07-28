@@ -9,7 +9,7 @@ resource "aws_subnet" "database" {
   }
 }
 
-resource "aws_route_table_association" "rtb" {
+resource "aws_route_table_association" "database" {
   subnet_id = aws_subnet.database.id
   route_table_id = aws_route_table.rtb.id
 }
