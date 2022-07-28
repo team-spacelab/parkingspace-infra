@@ -31,6 +31,9 @@ resource "aws_route_table_association" "backend_c" {
 }
 
 resource "aws_security_group" "backend" {
+  vpc_id = aws_vpc.vpc.id
+  name = "parkingspace-sg-backend"
+
   ingress {
     from_port = 3000
     to_port = 3000
@@ -42,6 +45,9 @@ resource "aws_security_group" "backend" {
 }
 
 resource "aws_security_group" "backend_elb" {
+  vpc_id = aws_vpc.vpc.id
+  name = "parkingspace-sg-elb"
+
   ingress {
     cidr_blocks = ["0.0.0.0/0"]
     from_port = 80
