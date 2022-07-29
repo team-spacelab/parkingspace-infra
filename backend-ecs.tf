@@ -20,3 +20,7 @@ resource "aws_ecs_cluster" "backend" {
 resource "aws_cloudwatch_log_group" "backend" {
   name = "parkingspace-backend-ecs"
 }
+
+resource "aws_cloudwatch_log_group" "backend_inside" {
+  name = "pakringspace-backend-log"  
+}

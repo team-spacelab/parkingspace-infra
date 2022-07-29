@@ -2,19 +2,27 @@ resource "aws_ecs_task_definition" "auth" {
   family = "parkingspace-backend-auth"
   requires_compatibilities = ["FARGATE"]
   network_mode = "awsvpc"
-  cpu = 256
-  memory = 512
+  cpu = 512
+  memory = 1024
   execution_role_arn = aws_iam_role.auth_fargate.arn
 
   container_definitions = jsonencode([{
     name = "auth"
     image = "${aws_ecr_repository.auth.name}:latest"
-    cpu = 256
-    memory = 512
+    cpu = 512
+    memory = 1024
     essential = true
     portMappings = [{
       containerPort = 3000
     }]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        awslogs-group = "${aws_cloudwatch_log_group.backend_inside.name}"
+        awslogs-region = "ap-northeast-2"
+        awslogs-stream-prefix = "auth"
+      }
+    }
   }])
 
   runtime_platform {
@@ -66,6 +74,15 @@ resource "aws_iam_role_policy" "auth_fargate" {
       "Action": [
         "ecr:GetAuthorizationToken"
       ]
+    },
+    {
+      "Sid": "CloudWatchLog",
+      "Effect": "Allow",
+      "Resource": "*",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ]
     }
   ]
 }
@@ -99,7 +116,8 @@ resource "aws_ecs_service" "auth" {
 
   lifecycle {
     ignore_changes = [
-      desired_count
+      desired_count,
+      task_definition
     ]
   }
 }
@@ -148,3 +166,5 @@ resource "aws_appautoscaling_policy" "auth_cpu" {
     target_value = 60
   }
 }
+
+
