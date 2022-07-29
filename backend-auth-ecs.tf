@@ -4,6 +4,7 @@ resource "aws_ecs_task_definition" "auth" {
   network_mode = "awsvpc"
   cpu = 256
   memory = 512
+  execution_role_arn = aws_iam_role.auth_fargate.arn
 
   container_definitions = jsonencode([{
     name = "auth"
@@ -21,16 +22,63 @@ resource "aws_ecs_task_definition" "auth" {
   }
 }
 
+resource "aws_iam_role" "auth_fargate" {
+  name = "parkingspace-auth-fargate-role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "auth_fargate" {
+  name = "parkingspace-auth-fargate-policy"  
+  role = aws_iam_role.auth_fargate.id
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowPushPull",
+      "Effect": "Allow",
+      "Resource": "${aws_ecr_repository.auth.arn}",
+      "Action": [
+        "ecr:BatchGetImage",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer"
+      ]
+    },
+    {
+      "Sid": "AllowAuth",
+      "Effect": "Allow",
+      "Resource": "*",
+      "Action": [
+        "ecr:GetAuthorizationToken"
+      ]
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_ecs_service" "auth" {
   name = "auth"
   cluster = aws_ecs_cluster.backend.id
   task_definition = aws_ecs_task_definition.auth.arn
+  launch_type = "FARGATE"
 
   desired_count = 2
-  ordered_placement_strategy {
-    type = "binpack"
-    field = "cpu"
-  }
 
   load_balancer {
     target_group_arn = aws_lb_target_group.auth.arn
@@ -39,6 +87,7 @@ resource "aws_ecs_service" "auth" {
   }
 
   network_configuration {
+    assign_public_ip = true
     subnets = [
       aws_subnet.backend_a.id,
       aws_subnet.backend_c.id
@@ -46,11 +95,6 @@ resource "aws_ecs_service" "auth" {
     security_groups = [
       aws_security_group.backend.id
     ]
-  }
-
-  placement_constraints {
-    type = "memberOf"
-    expression = "attribute:ecs.availablity-zone in [ap-northeast-2a, ap-northeast-2c]"
   }
 
   lifecycle {
