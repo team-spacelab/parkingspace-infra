@@ -12,7 +12,7 @@ resource "aws_lb_target_group" "auth" {
     timeout = 10
     matcher = "200"
     healthy_threshold = 2
-    unhealthy_threshold = 2
+    unhealthy_threshold = 5
   }
 }
 

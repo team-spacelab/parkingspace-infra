@@ -59,7 +59,7 @@ resource "aws_codepipeline" "auth" {
         ClusterName       = aws_ecs_cluster.backend.name
         ServiceName       = aws_ecs_service.auth.name
         FileName          = "imagedefinitions.json"
-        DeploymentTimeout = "5"
+        DeploymentTimeout = "10"
       }
     }
   }
