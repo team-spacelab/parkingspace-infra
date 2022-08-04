@@ -22,5 +22,5 @@ resource "aws_cloudwatch_log_group" "backend" {
 }
 
 resource "aws_cloudwatch_log_group" "backend_inside" {
-  name = "pakringspace-backend-log"  
+  name = "parkingspace-backend-log"
 }
