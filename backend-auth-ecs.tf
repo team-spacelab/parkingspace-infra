@@ -1,5 +1,5 @@
 resource "aws_ecs_task_definition" "auth" {
-  family = "parkingspace-backend-auth"
+  family = "parkingspace-backend-authv2"
   requires_compatibilities = ["FARGATE"]
   network_mode = "awsvpc"
   cpu = 512
