@@ -9,6 +9,6 @@ resource "aws_codestarnotifications_notification_rule" "space" {
   resource = aws_codepipeline.space.arn
 
   target {
-    address = aws_sns_topic.backend.arn
+    address = aws_sns_topic.webhook.arn
   }
 }

@@ -1,8 +1,8 @@
-resource "aws_sns_topic" "backend" {
+resource "aws_sns_topic" "webhook" {
   name = "parkingspace-sns-cicd"
 }
 
-data "aws_iam_policy_document" "backend_webhook" {
+data "aws_iam_policy_document" "webhook_webhook" {
   statement {
     actions = ["sns:Publish"]
 
@@ -11,27 +11,27 @@ data "aws_iam_policy_document" "backend_webhook" {
       identifiers = ["codestar-notifications.amazonaws.com"]
     }
 
-    resources = [aws_sns_topic.backend.arn]
+    resources = [aws_sns_topic.webhook.arn]
   }
 }
 
-resource "aws_sns_topic_policy" "backend" {
-  arn = aws_sns_topic.backend.arn
-  policy = data.aws_iam_policy_document.backend_webhook.json
+resource "aws_sns_topic_policy" "webhook" {
+  arn = aws_sns_topic.webhook.arn
+  policy = data.aws_iam_policy_document.webhook_webhook.json
 }
 
-data "archive_file" "backend_notification" {
+data "archive_file" "webhook_notification" {
   type = "zip"
   source_dir = "${path.module}/lambda/"
   output_path = "${path.module}/output/lambda.zip"
 }
 
-resource "aws_lambda_function" "backend_notification" {
-  filename = data.archive_file.backend_notification.output_path
+resource "aws_lambda_function" "webhook_notification" {
+  filename = data.archive_file.webhook_notification.output_path
   function_name = "parkingspace-lambda-cicd-notification"
   handler = "notification.handler"
-  source_code_hash = data.archive_file.backend_notification.output_base64sha256
-  role = aws_iam_role.backend_notification.arn
+  source_code_hash = data.archive_file.webhook_notification.output_base64sha256
+  role = aws_iam_role.webhook_notification.arn
   runtime = "nodejs16.x"
 
   environment {
@@ -48,7 +48,7 @@ resource "aws_lambda_function" "backend_notification" {
   }
 }
 
-resource "aws_iam_role" "backend_notification" {
+resource "aws_iam_role" "webhook_notification" {
   name = "parkingspace-role-cicd-notification"
 
   assume_role_policy = <<EOF
@@ -68,16 +68,16 @@ resource "aws_iam_role" "backend_notification" {
 EOF
 }
 
-resource "aws_sns_topic_subscription" "backend_notification" {
-  topic_arn = aws_sns_topic.backend.arn
+resource "aws_sns_topic_subscription" "webhook_notification" {
+  topic_arn = aws_sns_topic.webhook.arn
   protocol = "lambda"
-  endpoint = aws_lambda_function.backend_notification.arn
+  endpoint = aws_lambda_function.webhook_notification.arn
 }
 
-resource "aws_lambda_permission" "backend_notification" {
+resource "aws_lambda_permission" "webhook_notification" {
   statement_id = "AllowExecutionFromSNS"
   action = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.backend_notification.arn
+  function_name = aws_lambda_function.webhook_notification.arn
   principal = "sns.amazonaws.com"
-  source_arn = aws_sns_topic.backend.arn
+  source_arn = aws_sns_topic.webhook.arn
 }
