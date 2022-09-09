@@ -11,6 +11,14 @@ resource "aws_cloudfront_distribution" "cf" {
     }
   }
 
+  origin {
+    origin_id = "uploads"
+    domain_name = aws_s3_bucket.uploads.bucket_regional_domain_name
+
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.cfoai.cloudfront_access_identity_path
+    }
+  }
 
   origin {
     origin_id = "backend"
@@ -29,7 +37,7 @@ resource "aws_cloudfront_distribution" "cf" {
     allowed_methods = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "DELETE", "PATCH"]
     cached_methods = ["HEAD", "GET"]
     compress = false
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "https-only"
     path_pattern = "/api/*"
 
     forwarded_values {
@@ -39,6 +47,25 @@ resource "aws_cloudfront_distribution" "cf" {
 
       cookies {
         forward = "all"
+      }
+    }
+  }
+
+  ordered_cache_behavior {
+    target_origin_id = "uploads"
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods = ["HEAD", "GET"]
+    compress = true
+    viewer_protocol_policy = "https-only"
+    path_pattern = "/uploads/*"
+
+    forwarded_values {
+      query_string = false
+
+      headers = []
+
+      cookies {
+        forward = "none"
       }
     }
   }

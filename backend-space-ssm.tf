@@ -3,7 +3,7 @@ resource "aws_ssm_parameter" "space_env" {
   description = "SpaceServer@ParkingSpace Enviroment Configuration"
   type = "SecureString"
 
-  value = "\u0000"
+  value = "S3_BUCKET_NAME=${aws_s3_bucket.uploads.name}"
 
   lifecycle {
     ignore_changes = [
