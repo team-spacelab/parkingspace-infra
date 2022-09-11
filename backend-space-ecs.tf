@@ -83,6 +83,14 @@ resource "aws_iam_role_policy" "space_fargate" {
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ]
+    },
+    {
+      "Sid": "UploadSpacefile",
+      "Effect": "Allow",
+      "Resource": "${aws_s3_bucket.uploads.arn}/*",
+      "Action": [
+        "s3:PutObject"
+      ]
     }
   ]
 }
