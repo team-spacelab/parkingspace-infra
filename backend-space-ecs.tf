@@ -1,5 +1,5 @@
 resource "aws_ecs_task_definition" "space" {
-  family = "parkingspace-backend-space"
+  family = "parkingspace-backend-spacev2"
   requires_compatibilities = ["FARGATE"]
   network_mode = "awsvpc"
   cpu = 512
